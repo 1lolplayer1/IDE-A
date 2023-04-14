@@ -165,7 +165,8 @@ repl = [
 #file_tree = Frame(root, width=300, background=tree)
 #file_tree.pack(side='left', fill='y')
 
-
+termina_frame = Frame(root, width=300, height=50, background='pink')
+termina_frame.pack(side='bottom', fill='both')
 
 
 controll_panel = Frame(root, width=300, height=50, background='purple')
@@ -195,6 +196,7 @@ main_frame = Frame(root, relief=FLAT)
 main_frame.pack(fill=BOTH)
 
 
+
 editArea = Text(
     main_frame,
     background=background,
@@ -208,6 +210,49 @@ editArea = Text(
 
 editArea.pack(fill=BOTH, expand=1, side='right')
 
+class Terminal:
+    def __init__(self, master):
+        self.master = master
+        master.configure(bg='black')
+
+        # create entry widget for user input
+        self.entry = tk.Entry(termina_frame, width=80, fg='white', bg='black', insertbackground='white', bd=0, font=('Consolas', 13))
+        self.entry.pack(fill="both", side='bottom')
+        self.entry.focus_set()
+
+        # create text widget for terminal output
+        self.output = tk.Text(termina_frame, height=16, width=80, fg='white', bg='black', wrap='word', font=('Consolas', 13))
+        self.output.pack(fill="both", side='bottom')
+
+        # bind 'Return' key to execute command
+        self.entry.bind("<Return>", self.execute_command)
+
+        # set initial command prompt
+        self.output.insert(tk.END, "C:\\>")
+
+    def execute_command(self, event):
+        # get user input from entry widget
+        command = self.entry.get()
+        self.entry.delete(0, tk.END)
+
+        # print user input to terminal output
+        self.output.insert(tk.END, f"{command}\n")
+
+        # execute command and print output to terminal output
+        try:
+            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+            self.output.insert(tk.END, output.decode())
+        except subprocess.CalledProcessError as e:
+            self.output.insert(tk.END, f"Error: {e}\n")
+
+        # set command prompt to current working directory
+        cwd = subprocess.check_output("cd", shell=True)
+        self.output.insert(tk.END, f"{cwd.decode().strip()}\\>")
+
+terminal = Terminal(main_frame)
+
+
+
 
 ########################################
 #GAP
@@ -216,14 +261,14 @@ gap = Text(gapFrame, width=2, background=background, foreground=normal, insertba
 gap.pack(side='left', fill='y', expand=NO)
 
 
-menu_bar = Menu(root, background=background, fg=background)
+menu_bar = Menu(root)
 
 
-notes_bar = Menu(menu_bar, tearoff=0, background=background)
+notes_bar = Menu(menu_bar, tearoff=0)
 notes_bar.add_command(label='PLZ NOTE THAT IF U CLICK "SAVE AS" THEN WRITE -|.py|- EXTENSION URSELF AT THE END')
 menu_bar.add_cascade(label='!NOTE!', menu=notes_bar)
 
-file_menu = Menu(menu_bar, tearoff=0, background=background)
+file_menu = Menu(menu_bar, tearoff=0)
 file_menu.add_command(label='Open', command=open_file)
 file_menu.add_command(label='Save', command=save)
 file_menu.add_command(label='Save As', command=save_as)
@@ -257,49 +302,6 @@ editArea.bind('<Control-r>', run)
 editArea.bind('<Control-s>', save)
 editArea.bind('<Control-Alt-s>', save_as)
 
-class Terminal:
-    def __init__(self, master):
-        self.master = master
-        master.configure(bg='black')
-
-        # create entry widget for user input
-        self.entry = tk.Entry(root, width=80, fg='white', bg='black', insertbackground='white', bd=0, font=('Consolas', 13))
-        self.entry.pack(fill="both", side='bottom')
-        self.entry.focus_set()
-
-        # create text widget for terminal output
-        self.output = tk.Text(root, height=16, width=80, fg='white', bg='black', wrap='word', font=('Consolas', 13))
-        self.output.pack(fill="both", side='bottom')
-
-        # bind 'Return' key to execute command
-        self.entry.bind("<Return>", self.execute_command)
-
-        # set initial command prompt
-        self.output.insert(tk.END, "C:\\>")
-
-    def execute_command(self, event):
-        # get user input from entry widget
-        command = self.entry.get()
-        self.entry.delete(0, tk.END)
-
-        # print user input to terminal output
-        self.output.insert(tk.END, f"{command}\n")
-
-        # execute command and print output to terminal output
-        try:
-            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
-            self.output.insert(tk.END, output.decode())
-        except subprocess.CalledProcessError as e:
-            self.output.insert(tk.END, f"Error: {e}\n")
-
-        # set command prompt to current working directory
-        cwd = subprocess.check_output("cd", shell=True)
-        self.output.insert(tk.END, f"{cwd.decode().strip()}\\>")
-
-
-
-
-terminal = Terminal(root)
 changes()
 root.mainloop()
 
