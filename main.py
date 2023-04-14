@@ -1,28 +1,33 @@
 import tkinter as tk
+import subprocess
+import tkinter.ttk as ttk
 from tkinter import *
+from tkinter import filedialog
+from tkinter.messagebox import showinfo
 import ctypes
 import re
 import os
 from tkinter.filedialog import asksaveasfilename, askopenfilename
-import subprocess
-from tkterminal import Terminal
-import pygments.lexers
-from chlorophyll import CodeView
 import threading
+import customtkinter
 
 
 # Increas Dots Per inch so it looks sharper
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
+customtkinter.set_appearance_mode("dark")  
+customtkinter.set_default_color_theme("blue")
+
+
 
 # Setup Tkinter
-root = Tk()
+root = customtkinter.CTk()
 root.geometry('800x600')
 root.title("IDE-A (BETA 0.00001)")
 title = "IDE-A (Beta 0.00001)"
 root.state('zoomed')
 root.iconbitmap('IDE_Logo.ico')
 file_path = ''
-
+folder_path = ''
 
 def set_file_path(path):
     global file_path
@@ -40,7 +45,16 @@ def open_file():
         root.title(f'IDE-A (Beta 0.00001) {file_path}')
 
 
-def save_as(arg):
+def file_tree():
+    if folder_path =='':
+        folder_path = filedialog.askdirectory()
+    else:
+        print(folder_path)
+
+
+
+def save(s=0):
+    print(s, type(s))
     if file_path == '':
         path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
     else:
@@ -51,10 +65,19 @@ def save_as(arg):
         set_file_path(path)
         root.title(f'IDE-A (Beta 0.00001) {file_path}')
 
+def save_as(s=0):
+    print(s, type(s))
+    path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
+    with open(path, 'w') as file:
+        code = editArea.get('1.0', END)
+        file.write(code)
+        set_file_path(path)
+        root.title(f'IDE-A (Beta 0.00001) {file_path}')
 
 
-def run(arg):
-    
+
+def run(s=0):
+    print(s, type(s))
     if file_path == '':
         save_prompt = Toplevel()
         text = Label(save_prompt, text='Please save your code')
@@ -119,7 +142,8 @@ keywords = rgb((234, 95, 95))
 comments = rgb((95, 234, 165))
 string = rgb((234, 162, 95))
 function = rgb((95, 211, 234))
-background = rgb((42, 42, 42))
+background = rgb((40, 41, 35))
+tree = rgb((42, 42, 48))
 
 font = 'Consolas 15'
 
@@ -133,6 +157,17 @@ repl = [
     ['abs|all|any|ascii|bin|bool|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|property|range|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|vars|zip|__import__|', function]
 ]
 
+
+
+########################################
+#TREE
+########################################
+#file_tree = Frame(root, width=300, background=tree)
+#file_tree.pack(side='left', fill='y')
+
+
+
+
 controll_panel = Frame(root, width=300, height=50, background='purple')
 controll_panel.pack(side='top', fill='x')
 Run_bttn = PhotoImage(file='play.png')
@@ -142,45 +177,55 @@ img_label= Label(image=Run_bttn)
 def check_file_path():
     if file_path == '':
         Run_bttn.config(file='disk.png')
-        button.config(command=save_as)
+        control_bttn.config(command=save_as)
     else:
         Run_bttn.config(file='play.png')
-        button.config(command=run,)
+        control_bttn.config(command=run,)
     root.after(100, check_file_path)
 
 
-button= Button(controll_panel, image=Run_bttn, command=check_file_path,
+control_bttn= Button(controll_panel, image=Run_bttn, command=check_file_path,
 borderwidth=0)
+control_bttn.pack(side='right', pady=0.5)
+
+gapFrame = Frame(root, width=32)
+gapFrame.pack(side='left', fill='y')
+
+main_frame = Frame(root, relief=FLAT)
+main_frame.pack(fill=BOTH)
 
 
-button.pack(side='top', pady=0.5)
-editArea = CodeView(root, lexer=pygments.lexers.RustLexer, font=font)
-
-'''editArea = Text(
-    root,
+editArea = Text(
+    main_frame,
     background=background,
     foreground=normal,
     insertbackground=normal,
     relief=FLAT,
-    borderwidth=30,
+    #borderwidth=30,
+    pady=30,
     font=font,
-)'''
-
-# Place the Edit Area with the pack method
-editArea.pack(
-    fill=BOTH,
-    expand=1
 )
-menu_bar = Menu(root)
+
+editArea.pack(fill=BOTH, expand=1, side='right')
 
 
-notes_bar = Menu(menu_bar, tearoff=0)
+########################################
+#GAP
+########################################
+gap = Text(gapFrame, width=2, background=background, foreground=normal, insertbackground=normal, relief=FLAT, pady=30, font=font)
+gap.pack(side='left', fill='y', expand=NO)
+
+
+menu_bar = Menu(root, background=background, fg=background)
+
+
+notes_bar = Menu(menu_bar, tearoff=0, background=background)
 notes_bar.add_command(label='PLZ NOTE THAT IF U CLICK "SAVE AS" THEN WRITE -|.py|- EXTENSION URSELF AT THE END')
 menu_bar.add_cascade(label='!NOTE!', menu=notes_bar)
 
-file_menu = Menu(menu_bar, tearoff=0)
+file_menu = Menu(menu_bar, tearoff=0, background=background)
 file_menu.add_command(label='Open', command=open_file)
-file_menu.add_command(label='Save', command=save_as)
+file_menu.add_command(label='Save', command=save)
 file_menu.add_command(label='Save As', command=save_as)
 menu_bar.add_cascade(label='File', menu=file_menu)
 """
@@ -188,17 +233,15 @@ run_bar = Menu(menu_bar, tearoff=0)
 run_bar.add_command(label='Run', command=run)
 menu_bar.add_cascade(label='Run', menu=run_bar)
 """
-exit_bar = Menu(menu_bar, tearoff=0)
-exit_bar.add_command(label='Exit', command=exit)
-menu_bar.add_cascade(label='Exit', command=exit)
+exit_bar = Menu(menu_bar, tearoff=0, )
+exit_bar.add_command(label='Exit', command=exit, )
+menu_bar.add_cascade(label='Exit', command=exit, )
 
 root.config(menu=menu_bar)
 
-frame = Frame(root, width=800, height=50, background="yellow")
-frame.pack(fill='x')
+#frame = Frame(root, width=800, background="yellow")
+#frame.pack(fill='both')
 
-code_output = Terminal(frame, pady=5, padx=5, font='Consolas, 15')
-code_output.pack(expand=True, fill='both')
 
 
 
@@ -211,7 +254,52 @@ editArea.bind('<KeyRelease>', changes)
 
 # Bind Control + R to the exec function
 editArea.bind('<Control-r>', run)
-editArea.bind('<Control-s>', save_as)
+editArea.bind('<Control-s>', save)
+editArea.bind('<Control-Alt-s>', save_as)
 
-#changes()
+class Terminal:
+    def __init__(self, master):
+        self.master = master
+        master.configure(bg='black')
+
+        # create entry widget for user input
+        self.entry = tk.Entry(root, width=80, fg='white', bg='black', insertbackground='white', bd=0, font=('Consolas', 13))
+        self.entry.pack(fill="both", side='bottom')
+        self.entry.focus_set()
+
+        # create text widget for terminal output
+        self.output = tk.Text(root, height=16, width=80, fg='white', bg='black', wrap='word', font=('Consolas', 13))
+        self.output.pack(fill="both", side='bottom')
+
+        # bind 'Return' key to execute command
+        self.entry.bind("<Return>", self.execute_command)
+
+        # set initial command prompt
+        self.output.insert(tk.END, "C:\\>")
+
+    def execute_command(self, event):
+        # get user input from entry widget
+        command = self.entry.get()
+        self.entry.delete(0, tk.END)
+
+        # print user input to terminal output
+        self.output.insert(tk.END, f"{command}\n")
+
+        # execute command and print output to terminal output
+        try:
+            output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
+            self.output.insert(tk.END, output.decode())
+        except subprocess.CalledProcessError as e:
+            self.output.insert(tk.END, f"Error: {e}\n")
+
+        # set command prompt to current working directory
+        cwd = subprocess.check_output("cd", shell=True)
+        self.output.insert(tk.END, f"{cwd.decode().strip()}\\>")
+
+
+
+
+terminal = Terminal(root)
+changes()
 root.mainloop()
+
