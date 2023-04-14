@@ -4,16 +4,17 @@ import tkinter.ttk as ttk
 from tkinter import *
 from tkinter import filedialog
 from tkinter.messagebox import showinfo
-import ctypes
+#import ctypes
 import re
 import os
-from tkinter.filedialog import asksaveasfilename, askopenfilename
+from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import threading
 import customtkinter
 
 
+
 # Increas Dots Per inch so it looks sharper
-ctypes.windll.shcore.SetProcessDpiAwareness(True)
+#ctypes.windll.shcore.SetProcessDpiAwareness(True)
 customtkinter.set_appearance_mode("dark")  
 customtkinter.set_default_color_theme("blue")
 
@@ -24,41 +25,34 @@ root = customtkinter.CTk()
 root.geometry('800x600')
 root.title("IDE-A (BETA 0.00001)")
 title = "IDE-A (Beta 0.00001)"
-root.state('zoomed')
-root.iconbitmap('IDE_Logo.ico')
+root.state('normal')
+img = PhotoImage(file='IDE.png')
+root.tk.call('wm', 'iconphoto', root._w, img)
 file_path = ''
 folder_path = ''
 
-def set_file_path(path):
+def set_file_path(f_path):
     global file_path
-    file_path = path
+    file_path = f_path
 
 
 def open_file():
     root.title(f'IDE-A (Beta 0.00001) {file_path}')
-    path = askopenfilename(filetypes=[('Python Files', '*.py')])
+    f_path = askopenfilename(filetypes=[('Python Files', '*.py')])
     with open(path, 'r') as file:
         code = file.read()
         editArea.delete('1.0', END)
         editArea.insert('1.0', code)
-        set_file_path(path)
+        set_file_path(f_path)
         root.title(f'IDE-A (Beta 0.00001) {file_path}')
-
-
-def file_tree():
-    if folder_path =='':
-        folder_path = filedialog.askdirectory()
-    else:
-        print(folder_path)
-
 
 
 def save(s=0):
     print(s, type(s))
     if file_path == '':
-        path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
+        f_path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
     else:
-        path = file_path
+        f_path = file_path
     with open(path, 'w') as file:
         code = editArea.get('1.0', END)
         file.write(code)
@@ -67,11 +61,11 @@ def save(s=0):
 
 def save_as(s=0):
     print(s, type(s))
-    path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
-    with open(path, 'w') as file:
+    f_path = asksaveasfilename(filetypes=[('Python Files', '*.py')])
+    with open(f_path, 'w') as file:
         code = editArea.get('1.0', END)
         file.write(code)
-        set_file_path(path)
+        set_file_path(f_path)
         root.title(f'IDE-A (Beta 0.00001) {file_path}')
 
 
@@ -84,8 +78,14 @@ def run(s=0):
         text.pack()
         return
     else:
-        os.system(f'start cmd /K "python {file_path}"')
-        threading.Thread(target=run).start(1)
+        #Windows one
+        #os.system(f'start cmd /K "python {file_path}"')
+        #terminal.entry.insert("end", f"python3 {file_path}")
+
+        #for linux
+        os.system(f"gnome-terminal -e 'bash -c \"python3 {file_path}; bash\" '")
+        t = threading.Thread(target=run)
+        t.start(1)
 
 
 
@@ -98,11 +98,11 @@ def changes(event=None):
 
     # If actually no changes have been made stop / return the function
     if editArea.get('1.0', END) == previousText:
-        return
+        #return
 
     # Remove all tags so they can be redrawn
-    for tag in editArea.tag_names():
-        editArea.tag_remove(tag, "1.0", "end")
+        for tag in editArea.tag_names():
+            editArea.tag_remove(tag, "1.0", "end")
 
     # Add tags where the search_re function found the pattern
     i = 0
@@ -154,7 +154,7 @@ repl = [
     ['".*?"', string],
     ['\'.*?\'', string],
     ['#.*?$', comments],
-    ['abs|all|any|ascii|bin|bool|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dict|dir|divmod|enumerate|eval|exec|filter|float|format|frozenset|getattr|globals|hasattr|hash|help|hex|id|input|int|isinstance|issubclass|iter|len|list|locals|map|max|memoryview|min|next|object|oct|open|ord|pow|print|property|range|repr|reversed|round|set|setattr|slice|sorted|staticmethod|str|sum|super|tuple|type|vars|zip|__import__|', function]
+    ['print|input|', function]
 ]
 
 
@@ -162,10 +162,48 @@ repl = [
 ########################################
 #TREE
 ########################################
-#file_tree = Frame(root, width=300, background=tree)
-#file_tree.pack(side='left', fill='y')
+file_tree = Frame(root)
+file_tree.pack(side='left', fill=Y, expand=NO)
+def open_dir():
+    for i in tree.get_children():
+        tree.delete(i)
+    path = askdirectory()
+    abspath = os.path.abspath(path)
+    root_node = tree.insert('', 'end', text=abspath, open=True)
+    process_directory(root_node,abspath)
+def process_directory( parent, path):
+
+        for p in os.listdir(path):
+            abspath = os.path.join(path, p)
+            isdir = os.path.isdir(abspath)
+            oid = tree.insert(parent, 'end', text=p, open=False)
+            if isdir:
+                process_directory(oid, abspath)
 
 
+def Open_file_from_list_box(value):
+    global file
+    item_id = tree.selection()
+    file = tree.item(item_id, 'text') # get the filename from 'text' option
+    filepath = os.path.join(value,file)     
+    editArea.delete(1.0,END)
+    with open(filepath,"r") as f:
+        editArea.insert(1.0,f.read())
+
+tree = ttk.Treeview(file_tree)
+tree.pack(expand=YES,fill=BOTH)
+path = '.'
+tree.heading('#0', text=path, anchor='w')
+abspath = os.path.abspath(path)
+root_node = tree.insert('', 'end', text=abspath, open=True)
+process_directory(root_node, abspath)
+
+tree.bind("<<TreeviewSelect>>",lambda event=None:Open_file_from_list_box(path))
+
+
+
+terminal_frame = Frame(root, height=10, background='pink')
+terminal_frame.pack(side='bottom', fill='both')
 
 
 controll_panel = Frame(root, width=300, height=50, background='purple')
@@ -187,12 +225,15 @@ def check_file_path():
 control_bttn= Button(controll_panel, image=Run_bttn, command=check_file_path,
 borderwidth=0)
 control_bttn.pack(side='right', pady=0.5)
+open_dir = Button(controll_panel,text="Open Directory",command=open_dir)
+open_dir.pack(side='left', fill='y')
 
-gapFrame = Frame(root, width=32)
+gapFrame = Frame(root, width=1)
 gapFrame.pack(side='left', fill='y')
 
 main_frame = Frame(root, relief=FLAT)
 main_frame.pack(fill=BOTH)
+
 
 
 editArea = Text(
@@ -208,67 +249,18 @@ editArea = Text(
 
 editArea.pack(fill=BOTH, expand=1, side='right')
 
-
-########################################
-#GAP
-########################################
-gap = Text(gapFrame, width=2, background=background, foreground=normal, insertbackground=normal, relief=FLAT, pady=30, font=font)
-gap.pack(side='left', fill='y', expand=NO)
-
-
-menu_bar = Menu(root, background=background, fg=background)
-
-
-notes_bar = Menu(menu_bar, tearoff=0, background=background)
-notes_bar.add_command(label='PLZ NOTE THAT IF U CLICK "SAVE AS" THEN WRITE -|.py|- EXTENSION URSELF AT THE END')
-menu_bar.add_cascade(label='!NOTE!', menu=notes_bar)
-
-file_menu = Menu(menu_bar, tearoff=0, background=background)
-file_menu.add_command(label='Open', command=open_file)
-file_menu.add_command(label='Save', command=save)
-file_menu.add_command(label='Save As', command=save_as)
-menu_bar.add_cascade(label='File', menu=file_menu)
-"""
-run_bar = Menu(menu_bar, tearoff=0)
-run_bar.add_command(label='Run', command=run)
-menu_bar.add_cascade(label='Run', menu=run_bar)
-"""
-exit_bar = Menu(menu_bar, tearoff=0, )
-exit_bar.add_command(label='Exit', command=exit, )
-menu_bar.add_cascade(label='Exit', command=exit, )
-
-root.config(menu=menu_bar)
-
-#frame = Frame(root, width=800, background="yellow")
-#frame.pack(fill='both')
-
-
-
-
-# Insert some Standard Text into the Edit Area
-editArea.insert('1.0', """print("Hello To The IDE-A")
-""")
-
-# Bind the KeyRelase to the Changes Function
-editArea.bind('<KeyRelease>', changes)
-
-# Bind Control + R to the exec function
-editArea.bind('<Control-r>', run)
-editArea.bind('<Control-s>', save)
-editArea.bind('<Control-Alt-s>', save_as)
-
 class Terminal:
     def __init__(self, master):
         self.master = master
         master.configure(bg='black')
 
         # create entry widget for user input
-        self.entry = tk.Entry(root, width=80, fg='white', bg='black', insertbackground='white', bd=0, font=('Consolas', 13))
+        self.entry = tk.Entry(terminal_frame, width=80, fg='white', bg='black', insertbackground='white', bd=0, font=('Consolas', 13))
         self.entry.pack(fill="both", side='bottom')
         self.entry.focus_set()
 
         # create text widget for terminal output
-        self.output = tk.Text(root, height=16, width=80, fg='white', bg='black', wrap='word', font=('Consolas', 13))
+        self.output = tk.Text(terminal_frame, height=10, width=80, fg='white', bg='black', wrap='word', font=('Consolas', 13))
         self.output.pack(fill="both", side='bottom')
 
         # bind 'Return' key to execute command
@@ -296,10 +288,65 @@ class Terminal:
         cwd = subprocess.check_output("cd", shell=True)
         self.output.insert(tk.END, f"{cwd.decode().strip()}\\>")
 
+terminal = Terminal(main_frame)
 
 
 
-terminal = Terminal(root)
+
+########################################
+#GAP
+########################################
+gap = Label(gapFrame, width=1, background=background, foreground=normal, relief=FLAT, pady=30, font=font)
+gap.pack(side='left', fill='y', expand=NO)
+
+
+
+
+
+menu_bar = Menu(root)
+
+
+notes_bar = Menu(menu_bar, tearoff=0)
+notes_bar.add_command(label='PLZ NOTE THAT IF U CLICK "SAVE AS" THEN WRITE -|.py|- EXTENSION URSELF AT THE END')
+menu_bar.add_cascade(label='!NOTE!', menu=notes_bar)
+
+file_menu = Menu(menu_bar, tearoff=0)
+file_menu.add_command(label='Open', command=open_file)
+file_menu.add_command(label='Save', command=save)
+file_menu.add_command(label='Save As', command=save_as)
+menu_bar.add_cascade(label='File', menu=file_menu)
+"""
+run_bar = Menu(menu_bar, tearoff=0)
+run_bar.add_command(label='Run', command=run)
+menu_bar.add_cascade(label='Run', menu=run_bar)
+"""
+exit_bar = Menu(menu_bar, tearoff=0, )
+exit_bar.add_command(label='Exit', command=exit, )
+menu_bar.add_cascade(label='Exit', command=exit, )
+
+root.config(menu=menu_bar)
+
+#frame = Frame(root, width=800, background="yellow")
+#frame.pack(fill='both')
+
+
+
+
+
+# Insert some Standard Text into the Edit Area
+editArea.insert('1.0', """print("Hello To The IDE-A")
+""")
+
+# Bind the KeyRelase to the Changes Function
+editArea.bind('<KeyRelease>', changes)
+editArea.bind('<Control-r>', run)
+editArea.bind('<Control-s>', save)
+editArea.bind('<Control-Alt-s>', save_as)
+
+
+
+
 changes()
 root.mainloop()
+
 
