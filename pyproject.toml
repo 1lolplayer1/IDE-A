@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+[project]
+name = "IDE-A_package_1lolplayer1"
+version = "0.0.1"
+authors = [
+  { name="1lolplayer1", email="11lolplayer11@gmail.com" },
+]
+description = "Simple python IDE-A"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/1lolplayer1/IDE-A"
+"Bug Tracker" = "https://github.com/1lolplayer1/IDE-A/issues"
