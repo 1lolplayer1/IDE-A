@@ -11,25 +11,23 @@ import idlelib.colorizer as ic
 import idlelib.percolator as ip
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import threading
-import customtkinter as ctk
 
 
 
 # Increas Dots Per inch so it looks sharper
 ctypes.windll.shcore.SetProcessDpiAwareness(True)
-ctk.set_appearance_mode("dark")  
-ctk.set_default_color_theme("blue")
 
 
 
 # Setup Tkinter
-root = ctk.CTk()
+root = Tk()
 root.geometry('800x600')
 root.title("IDE-A (BETA 0.00001)")
 title = "IDE-A (Beta 0.00001)"
 root.state('normal')
-img = PhotoImage(file='IDE.png')
-root.tk.call('wm', 'iconphoto', root._w, img)
+#img = PhotoImage(file='IDE.png')
+root.iconbitmap("./IDE.ico")
+#root.tk.call('wm', 'iconphoto', root._w, img)
 file_path = ''
 folder_path = ''
 
@@ -165,7 +163,7 @@ font = 'Consolas 15'
 #TREE
 ########################################
 file_tree = Frame(root)
-file_tree.pack(side='left', fill=Y, expand=NO)
+file_tree.pack(side='left', fill=Y, expand="yes")
 def open_dir():
     global abspath
     for i in tree.get_children():
@@ -225,10 +223,10 @@ img_label= Label(image=Run_bttn)
 #checks file_path continuosly
 def check_file_path():
     if file_path == '':
-        Run_bttn.config(file='disk.png')
+        Run_bttn.config(file='./disk.png')
         control_bttn.config(command=save_as)
     else:
-        Run_bttn.config(file='play.png')
+        Run_bttn.config(file='./play.png')
         control_bttn.config(command=run,)
     root.after(100, check_file_path)
 
@@ -261,8 +259,9 @@ editArea = Text(
 
 editArea.pack(fill=BOTH, expand=1, side='right')
 
+
 cdg = ic.ColorDelegator()
-cdg.prog = re.compile(r'\b(?P<MYGROUP>tkinter)\b|' + ic.make_pat().pattern, re.S)
+cdg.prog = re.compile(r'\b(?P<MYGROUP>tkinter)\b|' + ic.make_pat(), re.S)
 cdg.idprog = r"(?<!class)\s+(\w+)"
 
 cdg.tagdefs['MYGROUP'] = {'foreground': '#7F7F7F', 'background': background}
@@ -358,12 +357,12 @@ terminal = Terminal(main_frame)
 
 
 def open_settings():
-    settings_window = ctk.CTk()
+    settings_window = Tk()
     settings_window.title("IDE-A (Options)")
     settings_window.geometry('600x400')
     settings_window.state('normal')
 
-    string_label = ctk.CTkLabel(settings_window, text='Nothing is here dude :) \nYet...', pady=100, font=('Consolas', 15))
+    string_label = Label(settings_window, text='Nothing is here dude :) \nYet...', pady=100, font=('Consolas', 15))
     string_label.pack()
     #string_label = ctk.CTkLabel(settings_window, text='Choose String color: ')
     #string_label.pack()
