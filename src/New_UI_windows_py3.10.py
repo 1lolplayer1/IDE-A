@@ -27,18 +27,20 @@ customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
 customtkinter.deactivate_automatic_dpi_awareness()
 
-# TEST FEATURES!!
-jedi.settings.add_bracket_after_function = True
-
 
 # Window configuration
 app = customtkinter.CTk()
 app.title("IDE-A (New UI)")
 app.geometry(f"{1100}x{770}")
-app.iconbitmap("src/images/IDE.ico")
-
+# app.iconbitmap("src/images/IDE.ico")
+# if error app.iconbitmap("src/images/IDE.ico") ---> #app.iconbitmap("src/images/IDE.ico")
+try:
+    app.iconbitmap("src/images/IDE.ico")
+except:
+    print("couldn't load icon")
 
 # Functions
+
 
 def change_appearance_mode_event(new_appearance_mode: str):
     customtkinter.set_appearance_mode(new_appearance_mode)
@@ -273,9 +275,6 @@ editareaScrollbar = customtkinter.CTkScrollbar(
     tabview.tab("Editor"), command=editArea.yview)
 editareaScrollbar.grid(row=0, column=5, sticky="nse")
 editArea.configure(yscrollcommand=editareaScrollbar.set)
-
-# linesCounter = customtkinter.CTkTextbox(tabview.tab("Editor"), state=tk.DISABLED, width=125, height=1)
-# inesCounter.grid(row=5, columnspan=2, sticky="sw")
 
 # boldSegoeUI = tkfont.Font(weight="bold")
 
