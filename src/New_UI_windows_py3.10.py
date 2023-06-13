@@ -81,6 +81,8 @@ def save(s=0):
     print(s, type(s))
     if file_path == "":
         f_path = asksaveasfilename(filetypes=[("Python Files", "*.py")])
+        if not f_path.endswith('.py'):  # Manually add .py extension if not present
+            f_path += '.py'
     else:
         f_path = file_path
     with open(f_path, "w") as file:
@@ -93,6 +95,8 @@ def save(s=0):
 def save_as(s=0):
     print(s, type(s))
     f_path = asksaveasfilename(filetypes=[("Python Files", "*.py")])
+    if not f_path.endswith('.py'):  # Manually add .py extension if not present
+        f_path += '.py'
     with open(f_path, "w") as file:
         code = editArea.get("1.0", END)
         file.write(code)
@@ -132,7 +136,7 @@ function = rgb((95, 211, 234))
 background = rgb((40, 41, 35))
 defTree = rgb((42, 42, 48))
 variables = rgb((148, 215, 71))
-defFont = "Consolas 15"
+defFont = "Consolas 10"
 
 
 # configure grid layout
@@ -273,18 +277,18 @@ editArea.configure(yscrollcommand=editareaScrollbar.set)
 # linesCounter = customtkinter.CTkTextbox(tabview.tab("Editor"), state=tk.DISABLED, width=125, height=1)
 # inesCounter.grid(row=5, columnspan=2, sticky="sw")
 
-boldSegoeUI = tkfont.Font(weight="bold")
+# boldSegoeUI = tkfont.Font(weight="bold")
 
 # Create the second text box to display the line count
 line_count_label = ttk.Label(tabview.tab(
-    "Editor"), text="Lines: 1", font=boldSegoeUI, background="#212121", foreground="white")
+    "Editor"), text="Lines: 1", font=defFont, background="#212121", foreground="white")
 line_count_label.grid(row=5, columnspan=2, sticky="sw", padx=10, pady=5)
 
 
 def Lines(line_count):
     content = editArea.get("1.0", "end-1c")
     line_count = content.count('\n') + 1
-    line_count_label.configure(text=f"Lines: {line_count}", font=boldSegoeUI)
+    line_count_label.configure(text=f"Lines: {line_count}", font=defFont)
 
 
 editArea.bind("<KeyRelease>", Lines)
