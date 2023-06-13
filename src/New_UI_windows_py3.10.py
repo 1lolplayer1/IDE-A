@@ -8,7 +8,7 @@ import time
 import threading
 import subprocess
 import customtkinter
-from tkinter import * # type: ignore
+from tkinter import *  # type: ignore
 from tkinter.messagebox import showinfo
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
@@ -27,8 +27,8 @@ customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
 customtkinter.deactivate_automatic_dpi_awareness()
 
-#TEST FEATURES!!
-jedi.settings.add_bracket_after_function= True
+# TEST FEATURES!!
+jedi.settings.add_bracket_after_function = True
 
 
 # Window configuration
@@ -39,24 +39,14 @@ app.iconbitmap("src/images/IDE.ico")
 
 
 # Functions
-def open_input_dialog_event():
-    dialog = customtkinter.CTkInputDialog(
-        text="Type in a number:", title="CTkInputDialog")
-    print("CTkInputDialog:", dialog.get_input())
-
 
 def change_appearance_mode_event(new_appearance_mode: str):
     customtkinter.set_appearance_mode(new_appearance_mode)
-    editArea.config(background='white')
 
 
 def change_scaling_event(new_scaling: str):
     new_scaling_float = int(new_scaling.replace("%", "")) / 100
     customtkinter.set_widget_scaling(new_scaling_float)
-
-
-def sidebar_button_event():
-    print("sidebar_button click")
 
 
 file_path = ""
@@ -125,7 +115,8 @@ def run(s=0):
         # for linux
         # os.system(f"gnome-terminal -e "bash -c \"python3 {file_path}; bash\" "")
         t = threading.Thread(target=run)
-        t.start(1) # type: ignore
+        t.start(1)  # type: ignore
+
 
 def rgb(rgb):
     return "#%02x%02x%02x" % rgb
@@ -144,12 +135,11 @@ variables = rgb((148, 215, 71))
 defFont = "Consolas 15"
 
 
-
 # configure grid layout
 app.grid_columnconfigure(1, weight=1)
-app.grid_columnconfigure((2, 3), weight=0) # type: ignore
+app.grid_columnconfigure((2, 3), weight=0)  # type: ignore
 app.grid_rowconfigure((0), weight=1)
-app.grid_rowconfigure((1, 2, 3, 4), weight=1) # type: ignore
+app.grid_rowconfigure((1, 2, 3, 4), weight=1)  # type: ignore
 
 navbar = customtkinter.CTkFrame(app, width=60, corner_radius=9)
 navbar.grid(row=0, column=2, columnspan=2, sticky="ne")
@@ -170,8 +160,8 @@ navbar_run.grid(row=3, column=0, sticky="n", padx=20, pady=(20, 20))
 # create sidebar frame with widgets
 sidebar_frame = customtkinter.CTkFrame(app, width=400, corner_radius=0)
 sidebar_frame.grid(row=0, rowspan=8, column=0, sticky="nswe")
-sidebar_frame.grid_rowconfigure((1, 2, 3, 4), weight=1) # type: ignore
-sidebar_frame.grid_columnconfigure((1, 2, 3), weight=1) # type: ignore
+sidebar_frame.grid_rowconfigure((1, 2, 3, 4), weight=1)  # type: ignore
+sidebar_frame.grid_columnconfigure((1, 2, 3), weight=1)  # type: ignore
 
 file_tree = Frame(sidebar_frame, width=400)
 file_tree.grid(row=0, column=0, sticky="wnse")
@@ -179,11 +169,11 @@ file_tree.grid(row=0, column=0, sticky="wnse")
 
 def open_dir():
     global abspath
-    for i in tree.get_children(): # type: ignore
-        tree.delete(i) # type: ignore
+    for i in tree.get_children():  # type: ignore
+        tree.delete(i)  # type: ignore
     path = askdirectory()
     abspath = os.path.abspath(path)
-    root_node = tree.insert("", "end", text=abspath, open=True) # type: ignore
+    root_node = tree.insert("", "end", text=abspath, open=True)  # type: ignore
     process_directory(root_node, abspath)
 
 
@@ -194,7 +184,7 @@ def process_directory(parent, path):
     for p in os.listdir(path):
         abspath = os.path.join(path, p)
         isdir = os.path.isdir(abspath)
-        oid = tree.insert(parent, "end", text=p, open=False) # type: ignore
+        oid = tree.insert(parent, "end", text=p, open=False)  # type: ignore
         filepaths[oid] = abspath  # save the full pathname
         if isdir:
             process_directory(oid, abspath)
@@ -204,7 +194,7 @@ def Open_file_from_list_box(value):
     global file_path
     file_path = ""
     try:
-        item_id = tree.selection()[0] # type: ignore
+        item_id = tree.selection()[0]  # type: ignore
         file_path = filepaths[item_id]  # get the full pathname
         app.title(f"IDE-A (BETA 0.00001) {file_path}")
         editArea.delete(1.0, END)
@@ -230,7 +220,7 @@ tree = ttk.Treeview(file_tree, height=20)
 tree.grid(row=1, sticky="nsw")
 path = "."
 tree.heading("#0", text="File Explorer", anchor=CENTER)
-tree.column("#0", width=255, minwidth=25, stretch="YES") # type: ignore
+tree.column("#0", width=255, minwidth=25, stretch="YES")  # type: ignore
 # tree.heading("#1", text="v0", anchor=CENTER)
 abspath = os.path.abspath(path)
 root_node = tree.insert("", "end", text=abspath, open=True)
@@ -258,9 +248,9 @@ scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 tabview = customtkinter.CTkTabview(app, width=700, height=400)
 tabview.grid(row=0, rowspan=4, column=1, padx=(
     20, 20), pady=(20, 20), sticky="n")
-tabview.grid_columnconfigure((0, 1), weight=1) # type: ignore
+tabview.grid_columnconfigure((0, 1), weight=1)  # type: ignore
 tabview.grid_rowconfigure(
-    (0, 1, 2), weight=1) # type: ignore
+    (0, 1, 2), weight=1)  # type: ignore
 tabview.add("Editor").grid_columnconfigure(0, weight=1)
 tabview.tab("Editor").grid_columnconfigure(0, weight=1)
 tabview.tab("Editor").grid_rowconfigure(
@@ -275,38 +265,42 @@ editArea = Text(tabview.tab("Editor"), width=700, height=400,
 editArea.grid(row=0, column=0, padx=(10, 10), pady=(
     10, 20), sticky="nsew")
 
-editareaScrollbar = customtkinter.CTkScrollbar(tabview.tab("Editor"), command=editArea.yview)
+editareaScrollbar = customtkinter.CTkScrollbar(
+    tabview.tab("Editor"), command=editArea.yview)
 editareaScrollbar.grid(row=0, column=5, sticky="nse")
 editArea.configure(yscrollcommand=editareaScrollbar.set)
 
-#linesCounter = customtkinter.CTkTextbox(tabview.tab("Editor"), state=tk.DISABLED, width=125, height=1)
-#inesCounter.grid(row=5, columnspan=2, sticky="sw")
+# linesCounter = customtkinter.CTkTextbox(tabview.tab("Editor"), state=tk.DISABLED, width=125, height=1)
+# inesCounter.grid(row=5, columnspan=2, sticky="sw")
 
 boldSegoeUI = tkfont.Font(weight="bold")
 
 # Create the second text box to display the line count
-line_count_label = ttk.Label(tabview.tab("Editor"), text="Lines: 1", font=boldSegoeUI, background="#212121", foreground="white")
+line_count_label = ttk.Label(tabview.tab(
+    "Editor"), text="Lines: 1", font=boldSegoeUI, background="#212121", foreground="white")
 line_count_label.grid(row=5, columnspan=2, sticky="sw", padx=10, pady=5)
+
 
 def Lines(line_count):
     content = editArea.get("1.0", "end-1c")
     line_count = content.count('\n') + 1
     line_count_label.configure(text=f"Lines: {line_count}", font=boldSegoeUI)
 
+
 editArea.bind("<KeyRelease>", Lines)
 
 
-
 tabfont = tkfont.Font(font=editArea['font'])
-  
+
 # Set Tab size
 tab_size = tabfont.measure('    ')
 editArea.config(tabs=tab_size)
 
 
 cdg = ic.ColorDelegator()
-cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" + ic.make_pat().pattern, re.S)
-cdg.idprog = r"(?<!class)\s+(\w+)" # type: ignore
+cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" +
+                      ic.make_pat().pattern, re.S)
+cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 
 background = "#FFFFFF"
 
@@ -371,41 +365,41 @@ class Terminal:
         self.output.configure(state="disabled")
 
         th = threading.Thread(target=run)
-        th.start(1) # type: ignore
+        th.start(1)  # type: ignore
 
 
 terminal = Terminal(tabview.tab("Terminal"))
 
 
-
-
-
 def insert_parenthesis(event):
-   
+
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, ")")
+
 
 def insert_squiggle(event):
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, "}")
 
+
 def insert_square(event):
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, "]")
+
 
 def insert_bracket(event):
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, '"')
 
+
 def insert_quota(event):
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, "'")
 
+
 def insert_sht(event):
     current_index = editArea.index(tk.INSERT)
     editArea.insert(current_index, "`")
-
-
 
 
 # set default values
@@ -413,15 +407,15 @@ appearance_mode_optionemenu.set("Dark")
 scaling_optionemenu.set("100%")
 
 editArea.insert("0.0", 'print("Welcome To The IDE-A")')
-editArea.bind("<Control-r>", run) # type: ignore
-editArea.bind("<Control-s>", save) # type: ignore
+editArea.bind("<Control-r>", run)  # type: ignore
+editArea.bind("<Control-s>", save)  # type: ignore
 editArea.bind("<KeyRelease-(>", insert_parenthesis)
 editArea.bind("<KeyRelease-{>", insert_squiggle)
 editArea.bind("<KeyRelease-[>", insert_square)
 editArea.bind('<KeyRelease-">', insert_bracket)
 editArea.bind("<KeyRelease-'>", insert_quota)
 editArea.bind("<KeyRelease-`>", insert_sht)
-editArea.bind("<Control-Alt-s>", save_as) # type: ignore
+editArea.bind("<Control-Alt-s>", save_as)  # type: ignore
 tabview.tab("Editor").bind("<KeyRelease>", Lines)
 
 
