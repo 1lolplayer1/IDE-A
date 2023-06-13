@@ -11,7 +11,8 @@ import customtkinter
 from tkinter import * # type: ignore
 from tkinter.messagebox import showinfo
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
-
+#import jedi
+import tkinter.font as tkfont
 
 # Global start messages
 print("This is a beta version")
@@ -26,6 +27,9 @@ customtkinter.set_appearance_mode("Dark")
 customtkinter.set_default_color_theme("dark-blue")
 customtkinter.deactivate_automatic_dpi_awareness()
 
+#TEST FEATURES!! NVM
+#jedi.settings.add_bracket_after_function= True
+
 
 # Window configuration
 app = customtkinter.CTk()
@@ -33,7 +37,6 @@ app.title("IDE-A (New UI)")
 app.geometry(f"{1100}x{770}")
 app.iconbitmap("src/images/IDE.ico")
 
-background = "#282923"
 
 # Functions
 def open_input_dialog_event():
@@ -44,13 +47,7 @@ def open_input_dialog_event():
 
 def change_appearance_mode_event(new_appearance_mode: str):
     customtkinter.set_appearance_mode(new_appearance_mode)
-    if background == "#282923":
-        background = "#ffffff"
-        editArea.config(background='white')
-    elif background == "#ffffff":
-        background = "#282923"
-        editArea.config(background='#282923')
-
+    editArea.config(background='white')
 
 
 def change_scaling_event(new_scaling: str):
@@ -142,10 +139,9 @@ comments = rgb((95, 234, 165))
 string = rgb((234, 162, 95))
 function = rgb((95, 211, 234))
 background = rgb((40, 41, 35))
-tree = rgb((42, 42, 48))
+defTree = rgb((42, 42, 48))
 variables = rgb((148, 215, 71))
-font = "Consolas 15"
-
+defFont = "Consolas 15"
 
 
 
@@ -243,14 +239,14 @@ process_directory(root_node, abspath)
 tree.bind("<<TreeviewSelect>>", lambda event=None: Open_file_from_list_box(path))
 
 
-'''appearance_mode_label = customtkinter.CTkLabel(
+appearance_mode_label = customtkinter.CTkLabel(
     sidebar_frame, text="Appearance Mode:", anchor="w")
 appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
 appearance_mode_optionemenu = customtkinter.CTkOptionMenu(sidebar_frame, values=[
-                                                          "Light", "Dark"], command=change_appearance_mode_event)
+                                                          "Why tf you need light mode", "Dark"], command=change_appearance_mode_event)
 # appearance_mode_optionemenu = customtkinter.CTkOptionMenu(sidebar_frame, values=["Light", "Dark", "System"],
 # command=change_appearance_mode_event)
-appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))'''
+appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
 scaling_label = customtkinter.CTkLabel(
     sidebar_frame, text="UI Scaling:", anchor="w")
 scaling_label.grid(row=7, column=0, padx=20, pady=(10, 0))
@@ -265,33 +261,63 @@ tabview.grid(row=0, rowspan=4, column=1, padx=(
 tabview.grid_columnconfigure((0, 1), weight=1) # type: ignore
 tabview.grid_rowconfigure(
     (0, 1, 2), weight=1) # type: ignore
-tabview.add("MainFile").grid_columnconfigure(0, weight=1)
-tabview.tab("MainFile").grid_columnconfigure(0, weight=1)
-tabview.tab("MainFile").grid_rowconfigure(
+tabview.add("Editor").grid_columnconfigure(0, weight=1)
+tabview.tab("Editor").grid_columnconfigure(0, weight=1)
+tabview.tab("Editor").grid_rowconfigure(
     0, weight=1)
 tabview.add("Terminal").grid_columnconfigure(0, weight=1)
 tabview.tab("Terminal").grid_columnconfigure(0, weight=1)
 tabview.tab("Terminal").grid_rowconfigure(
     0, weight=1)
 # configure grid of individual tabs
-editArea = Text(tabview.tab("MainFile"), width=700, height=400,
-                font=("Consolas", 13), bg=background, fg="white", insertbackground="white", borderwidth=0)
+editArea = Text(tabview.tab("Editor"), width=700, height=400,
+                font=("Consolas", 13), bg=background, fg="white", insertbackground="white", borderwidth=0, padx=15, pady=10)
 editArea.grid(row=0, column=0, padx=(10, 10), pady=(
     10, 20), sticky="nsew")
+
+editareaScrollbar = customtkinter.CTkScrollbar(tabview.tab("Editor"), command=editArea.yview)
+editareaScrollbar.grid(row=0, column=5, sticky="nse")
+editArea.configure(yscrollcommand=editareaScrollbar.set)
+
+#linesCounter = customtkinter.CTkTextbox(tabview.tab("Editor"), state=tk.DISABLED, width=125, height=1)
+#inesCounter.grid(row=5, columnspan=2, sticky="sw")
+
+boldSegoeUI = tkfont.Font(weight="bold")
+
+# Create the second text box to display the line count
+line_count_label = ttk.Label(tabview.tab("Editor"), text="Lines: 1", font=boldSegoeUI, background="#212121", foreground="white")
+line_count_label.grid(row=5, columnspan=2, sticky="sw", padx=10, pady=5)
+
+def Lines(line_count):
+    content = editArea.get("1.0", "end-1c")
+    line_count = content.count('\n') + 1
+    line_count_label.configure(text=f"Lines: {line_count}", font=boldSegoeUI)
+
+editArea.bind("<KeyRelease>", Lines)
+
+
+
+tabfont = tkfont.Font(font=editArea['font'])
+  
+# Set Tab size
+tab_size = tabfont.measure('    ')
+editArea.config(tabs=tab_size)
+
 
 cdg = ic.ColorDelegator()
 cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" + ic.make_pat(), re.S)
 cdg.idprog = r"(?<!class)\s+(\w+)" # type: ignore
 
+background = "#FFFFFF"
 
-cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": background}
+cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#282923"}
 
 # These five lines are optional. If omitted, default colours are used.
-cdg.tagdefs["COMMENT"] = {"foreground": "#007F00 ", "background": background}
-cdg.tagdefs["KEYWORD"] = {"foreground": "#27b1dd", "background": background}
-cdg.tagdefs["BUILTIN"] = {"foreground": "#dddd22", "background": background}
-cdg.tagdefs["STRING"] = {"foreground": "#8b9b40", "background": background}
-cdg.tagdefs["DEFINITION"] = {"foreground": "#27b9b9", "background": background}
+cdg.tagdefs["COMMENT"] = {"foreground": "#007F00 ", "background": "#282923"}
+cdg.tagdefs["KEYWORD"] = {"foreground": "#27b1dd", "background": "#282923"}
+cdg.tagdefs["BUILTIN"] = {"foreground": "#dddd22", "background": "#282923"}
+cdg.tagdefs["STRING"] = {"foreground": "#8b9b40", "background": "#282923"}
+cdg.tagdefs["DEFINITION"] = {"foreground": "#27b9b9", "background": "#282923"}
 
 
 ip.Percolator(editArea).insertfilter(cdg)
@@ -350,14 +376,53 @@ class Terminal:
 
 terminal = Terminal(tabview.tab("Terminal"))
 
+
+
+
+
+def insert_parenthesis(event):
+   
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, ")")
+
+def insert_squiggle(event):
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, "}")
+
+def insert_square(event):
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, "]")
+
+def insert_bracket(event):
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, '"')
+
+def insert_quota(event):
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, "'")
+
+def insert_sht(event):
+    current_index = editArea.index(tk.INSERT)
+    editArea.insert(current_index, "`")
+
+
+
+
 # set default values
-#appearance_mode_optionemenu.set("Dark")
+appearance_mode_optionemenu.set("Dark")
 scaling_optionemenu.set("100%")
 
 editArea.insert("0.0", 'print("Welcome To The IDE-A")')
 editArea.bind("<Control-r>", run) # type: ignore
 editArea.bind("<Control-s>", save) # type: ignore
+editArea.bind("<KeyRelease-(>", insert_parenthesis)
+editArea.bind("<KeyRelease-{>", insert_squiggle)
+editArea.bind("<KeyRelease-[>", insert_square)
+editArea.bind('<KeyRelease-">', insert_bracket)
+editArea.bind("<KeyRelease-'>", insert_quota)
+editArea.bind("<KeyRelease-`>", insert_sht)
 editArea.bind("<Control-Alt-s>", save_as) # type: ignore
+tabview.tab("Editor").bind("<KeyRelease>", Lines)
 
 
 app.mainloop()
