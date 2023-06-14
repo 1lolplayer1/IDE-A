@@ -17,11 +17,13 @@ from tkinter import messagebox
 from watchdog import *
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from pathlib import Path
+import stat
 
 # Global start messages
 print("This is a beta version")
 print("report any bugs to https://github.com/1lolplayer1/IDE-A")
-time.sleep(0.5)
+# time.sleep(0.2)
 
 
 # Customtkinter.set values
@@ -80,7 +82,22 @@ def change_scaling_event(new_scaling: str):
 
 
 file_path = ""
-path = "."
+
+dir_path = os.path.join(os.environ['USERPROFILE'], "Desktop")
+directory_name = "IDE-APROJECT"
+
+# Create the directory
+directory_path = os.path.join(dir_path, directory_name)
+
+if not os.path.exists(directory_path):
+    try:
+        os.makedirs(directory_path)
+        print(f"Directory '{directory_name}' created successfully!")
+    except OSError as error:
+        print(f"Failed to create directory: {error}")
+else:
+    print(f"Directory '{directory_name}' already exists. Skipping creation.")
+path = directory_path
 
 
 def set_file_path(f_path):
@@ -239,6 +256,8 @@ def Open_file_from_list_box(value):
 
 
 def newfile():
+    new_file_path = abspath
+    os.chmod(new_file_path, 0o700)
     base_filename = 'new.py'
     file_exists = os.path.exists(base_filename)
 
@@ -252,7 +271,7 @@ def newfile():
     else:
         new_filename = base_filename
 
-    fp = open(new_filename, 'x')
+    fp = open(new_file_path, 'x')
     fp.close()
 
 
@@ -308,7 +327,11 @@ style.map("Treeview", background=[("selected", "grey")])
 
 tree = ttk.Treeview(file_tree, height=20)
 tree.grid(row=1, sticky="nsw")
-path = "."
+
+
+path = directory_path
+
+
 tree.heading("#0", text="File Explorer", anchor=CENTER)
 tree.column("#0", width=255, minwidth=25, stretch="YES")  # type: ignore
 # tree.heading("#1", text="v0", anchor=CENTER)
