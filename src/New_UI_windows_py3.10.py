@@ -14,6 +14,9 @@ from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
 import tkinter.font as tkfont
 from tkinter import messagebox
+from watchdog import *
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 # Global start messages
 print("This is a beta version")
@@ -44,7 +47,30 @@ except:
 
 
 def change_appearance_mode_event(new_appearance_mode: str):
+    global SyntaxBg
+    print("Current Mode: ", new_appearance_mode)
     customtkinter.set_appearance_mode(new_appearance_mode)
+    if new_appearance_mode == "Light":
+        editArea.config(bg="white", foreground="black")
+        style.configure("Treeview", background="#E5E5E5", foreground="black",
+                        rowheight=25, fieldbackground="#E5E5E5", borderwidth=0)
+        line_count_label.config(background="#E5E5E5", foreground="black")
+        SyntaxBg = "white"
+
+    elif new_appearance_mode == "Dark":
+        editArea.config(bg="#282923")
+        style.configure("Treeview", background="#212121", foreground="white",
+                        rowheight=25, fieldbackground="#212121", borderwidth=0)
+        line_count_label.config(background="#212121", foreground="white")
+        SyntaxBg = "#282923"
+
+
+def SyntaxBgCheck(new_appearance_mode: str):
+    global SyntaxBg
+    if new_appearance_mode == "Light":
+        SyntaxBg = "white"
+    else:
+        SyntaxBg = "#282923"
 
 
 def change_scaling_event(new_scaling: str):
@@ -229,6 +255,27 @@ def newfile():
     fp.close()
 
 
+class FileChangeHandler(FileSystemEventHandler):
+    def __init__(self, tree):
+        super().__init__()
+        self.tree = tree
+
+    def on_any_event(self, event):
+        # Refresh the TreeView after a delay
+        self.tree.after(1000, refresh_treeview)
+
+
+def refresh_treeview():
+    global tree, filepaths
+    tree.delete(*tree.get_children())
+    # Get the selected directory path
+    abspath = tree.item(tree.focus())['text']
+    if not abspath:  # If no directory is selected, default to current working directory
+        abspath = os.getcwd()
+    root_node = tree.insert("", "end", text=abspath, open=True)
+    process_directory(root_node, abspath)
+
+
 open_dir_bttn = customtkinter.CTkButton(
     sidebar_frame, text="Open Directory", command=open_dir, font=("Arial", 13))
 
@@ -257,12 +304,17 @@ process_directory(root_node, abspath)
 
 tree.bind("<<TreeviewSelect>>", lambda event=None: Open_file_from_list_box(path))
 
+event_handler = FileChangeHandler(tree)
+observer = Observer()
+observer.schedule(event_handler, path, recursive=True)
+observer.start()
+
 
 appearance_mode_label = customtkinter.CTkLabel(
     sidebar_frame, text="Appearance Mode:", anchor="w")
 appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
 appearance_mode_optionemenu = customtkinter.CTkOptionMenu(sidebar_frame, values=[
-                                                          "Why tf you need light mode", "Dark"], command=change_appearance_mode_event)
+                                                          "Light", "Dark"], command=change_appearance_mode_event)
 # appearance_mode_optionemenu = customtkinter.CTkOptionMenu(sidebar_frame, values=["Light", "Dark", "System"],
 # command=change_appearance_mode_event)
 appearance_mode_optionemenu.grid(row=6, column=0, padx=20, pady=(10, 10))
@@ -320,6 +372,7 @@ treeMenu = Menu(tree, tearoff=False,
                 background=background, foreground="white", borderwidth=None)
 treeMenu.add_command(label="New File", command=newfile)
 treeMenu.add_command(label="Run Code", command=run)
+treeMenu.add_command(label="Refresh", command=refresh_treeview)
 
 tree.bind("<Button-3>", treeContxtMenu)
 app.bind("<Button-3>", contxtMenu)
@@ -348,22 +401,21 @@ tabfont = tkfont.Font(font=editArea['font'])
 tab_size = tabfont.measure('    ')
 editArea.config(tabs=tab_size)
 
+SyntaxBg = ""
 
 cdg = ic.ColorDelegator()
 cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" +
                       ic.make_pat().pattern, re.S)
 cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 
-background = "#FFFFFF"
-
 cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#282923"}
 
 # These five lines are optional. If omitted, default colours are used.
-cdg.tagdefs["COMMENT"] = {"foreground": "#007F00 ", "background": "#282923"}
-cdg.tagdefs["KEYWORD"] = {"foreground": "#27b1dd", "background": "#282923"}
-cdg.tagdefs["BUILTIN"] = {"foreground": "#dddd22", "background": "#282923"}
-cdg.tagdefs["STRING"] = {"foreground": "#8b9b40", "background": "#282923"}
-cdg.tagdefs["DEFINITION"] = {"foreground": "#27b9b9", "background": "#282923"}
+cdg.tagdefs["COMMENT"] = {"foreground": "#007F00 ", "background": SyntaxBg}
+cdg.tagdefs["KEYWORD"] = {"foreground": "#27b1dd", "background": SyntaxBg}
+cdg.tagdefs["BUILTIN"] = {"foreground": "#dddd22", "background": SyntaxBg}
+cdg.tagdefs["STRING"] = {"foreground": "#8b9b40", "background": SyntaxBg}
+cdg.tagdefs["DEFINITION"] = {"foreground": "#27b9b9", "background": SyntaxBg}
 
 
 ip.Percolator(editArea).insertfilter(cdg)
