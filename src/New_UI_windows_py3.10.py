@@ -9,7 +9,7 @@ import threading
 import subprocess
 import customtkinter
 from tkinter import *  # type: ignore
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, askyesno
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
 import tkinter.font as tkfont
@@ -265,6 +265,19 @@ class FileChangeHandler(FileSystemEventHandler):
         self.tree.after(1000, refresh_treeview)
 
 
+def remove_component_from_tree():
+    selected_items = tree.selection()
+    for item_id in selected_items:
+        file_path = filepaths.get(item_id)
+        if file_path and os.path.isfile(file_path):
+            response = askyesno(
+                "Delete File", f"Do you want to delete the file '{file_path}'?")
+            if response:
+                os.remove(file_path)
+                del filepaths[item_id]
+                tree.delete(item_id)
+
+
 def refresh_treeview():
     global tree, filepaths
     tree.delete(*tree.get_children())
@@ -371,7 +384,7 @@ contextMenu.add_command(label="Run Code", command=run)
 treeMenu = Menu(tree, tearoff=False,
                 background=background, foreground="white", borderwidth=None)
 treeMenu.add_command(label="New File", command=newfile)
-treeMenu.add_command(label="Run Code", command=run)
+treeMenu.add_command(label="Remove", command=remove_component_from_tree)
 treeMenu.add_command(label="Refresh", command=refresh_treeview)
 
 tree.bind("<Button-3>", treeContxtMenu)
