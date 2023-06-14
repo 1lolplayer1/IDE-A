@@ -13,6 +13,7 @@ from tkinter.messagebox import showinfo
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
 import tkinter.font as tkfont
+from tkinter import messagebox
 
 # Global start messages
 print("This is a beta version")
@@ -210,10 +211,32 @@ def Open_file_from_list_box(value):
         print(ex.__class__.__name__, ex)
 
 
+def newfile():
+    base_filename = 'new.py'
+    file_exists = os.path.exists(base_filename)
+
+    if file_exists:
+        count = 1
+        while file_exists:
+            # Adds a number before the file extension
+            new_filename = f"{base_filename[:-3]}_{count}.py"
+            count += 1
+            file_exists = os.path.exists(new_filename)
+    else:
+        new_filename = base_filename
+
+    fp = open(new_filename, 'x')
+    fp.close()
+
+
 open_dir_bttn = customtkinter.CTkButton(
     sidebar_frame, text="Open Directory", command=open_dir, font=("Arial", 13))
-open_dir_bttn.grid(row=4, column=0, sticky="n", pady=(2, 2))
 
+new_dir_buttton = customtkinter.CTkButton(
+    sidebar_frame, text="New file", font=("Arial", 13), command=newfile
+)
+new_dir_buttton.grid(row=2, column=0, sticky="n", pady=(2, 2))
+open_dir_bttn.grid(row=3, column=0, sticky="n", pady=(2, 2))
 
 style = ttk.Style()
 style.theme_use("classic")
@@ -275,6 +298,32 @@ editareaScrollbar = customtkinter.CTkScrollbar(
     tabview.tab("Editor"), command=editArea.yview)
 editareaScrollbar.grid(row=0, column=5, sticky="nse")
 editArea.configure(yscrollcommand=editareaScrollbar.set)
+
+
+def contxtMenu(e):
+    contextMenu.tk_popup(e.x_root, e.y_root)
+
+
+def treeContxtMenu(e):
+    treeMenu.tk_popup(e.x_root, e.y_root)
+
+
+contextMenu = Menu(app, tearoff=False,
+                   background=background, foreground="white", borderwidth=0)
+contextMenu.add_command(label="Save", command=save)
+contextMenu.add_command(label="Open", command=open_file)
+contextMenu.add_command(label="Save as", command=save_as)
+contextMenu.add_separator()
+contextMenu.add_command(label="Run Code", command=run)
+
+treeMenu = Menu(tree, tearoff=False,
+                background=background, foreground="white", borderwidth=None)
+treeMenu.add_command(label="New File", command=newfile)
+treeMenu.add_command(label="Run Code", command=run)
+
+tree.bind("<Button-3>", treeContxtMenu)
+app.bind("<Button-3>", contxtMenu)
+
 
 # boldSegoeUI = tkfont.Font(weight="bold")
 
