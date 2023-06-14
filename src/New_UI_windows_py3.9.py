@@ -50,6 +50,7 @@ def change_appearance_mode_event(new_appearance_mode: str):
     global SyntaxBg
     print("Current Mode: ", new_appearance_mode)
     customtkinter.set_appearance_mode(new_appearance_mode)
+
     if new_appearance_mode == "Light":
         editArea.config(bg="white", foreground="black")
         style.configure("Treeview", background="#E5E5E5", foreground="black",

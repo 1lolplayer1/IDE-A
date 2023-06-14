@@ -51,14 +51,15 @@ def change_appearance_mode_event(new_appearance_mode: str):
     print("Current Mode: ", new_appearance_mode)
     customtkinter.set_appearance_mode(new_appearance_mode)
     if new_appearance_mode == "Light":
-        editArea.config(bg="white", foreground="black")
+        editArea.config(bg="white", foreground="black",
+                        insertbackground="black")
         style.configure("Treeview", background="#E5E5E5", foreground="black",
                         rowheight=25, fieldbackground="#E5E5E5", borderwidth=0)
         line_count_label.config(background="#E5E5E5", foreground="black")
         SyntaxBg = "white"
 
     elif new_appearance_mode == "Dark":
-        editArea.config(bg="#282923")
+        editArea.config(bg="#282923", insertbackground="white")
         style.configure("Treeview", background="#212121", foreground="white",
                         rowheight=25, fieldbackground="#212121", borderwidth=0)
         line_count_label.config(background="#212121", foreground="white")
