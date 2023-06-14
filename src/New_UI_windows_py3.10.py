@@ -13,6 +13,7 @@ from tkinter.messagebox import showinfo
 from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
 import tkinter.font as tkfont
+from tkinter import messagebox
 
 # Global start messages
 print("This is a beta version")
@@ -103,9 +104,6 @@ def save_as(s=0):
 def run(s=0):
     print(s, type(s))
     if file_path == "":
-        save_prompt = Toplevel()
-        text = Label(save_prompt, text="Please save your code")
-        text.pack()
         save()
         return
     else:
@@ -203,10 +201,29 @@ def Open_file_from_list_box(value):
     except Exception as ex:
         print(ex.__class__.__name__, ex)
 
+def newfile():
+    base_filename = 'new.py'
+    file_exists = os.path.exists(base_filename)
 
+    if file_exists:
+        count = 1
+        while file_exists:
+            new_filename = f"{base_filename[:-3]}_{count}.py"  # Adds a number before the file extension
+            count += 1
+            file_exists = os.path.exists(new_filename)
+    else:
+        new_filename = base_filename
+
+    fp = open(new_filename, 'x')
+    fp.close()
+    
 open_dir_bttn = customtkinter.CTkButton(
     sidebar_frame, text="Open Directory", command=open_dir, font=("Arial", 13))
-open_dir_bttn.grid(row=4, column=0, sticky="n", pady=(2, 2))
+new_dir_buttton = customtkinter.CTkButton(
+    sidebar_frame, text= "New file", font=("Arial", 13), command=newfile
+)
+new_dir_buttton.grid(row=2, column=0, sticky="n", pady=(2,2))
+open_dir_bttn.grid(row=3, column=0, sticky="n", pady=(2, 2))
 
 
 style = ttk.Style()
