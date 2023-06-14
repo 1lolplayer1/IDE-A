@@ -65,7 +65,7 @@ def change_appearance_mode_event(new_appearance_mode: str):
         style.configure("Treeview", background = "#212121", foreground = "white",
                         rowheight = 25, fieldbackground = "#212121", borderwidth = 0)
         line_count_label.config(background = "#212121", foreground = "white")
-        SyntaxBg = "#333333"
+        SyntaxBg = "#212121"
         
 
 
@@ -74,7 +74,7 @@ def SyntaxBgCheck(new_appearance_mode: str):
     if new_appearance_mode ==  "Light":
         SyntaxBg = "white"
     else:
-        SyntaxBg = "#333333"
+        SyntaxBg = "#212121"
 
 
 def change_scaling_event(new_scaling: str):
@@ -181,7 +181,8 @@ keywords =   rgb((234, 95, 95))
 comments =   rgb((95, 234, 165))
 string =   rgb((234, 162, 95))
 function =   rgb((39, 121, 221))
-defbackground =   rgb((51, 51, 51))
+defbackground =   rgb((33, 33, 33))
+Winbackground = rgb((51, 51, 51))
 defTree =   rgb((42, 42, 48))
 variables =   rgb((148, 215, 71))
 defFont = "Consolas 10"
@@ -381,7 +382,7 @@ tabview.tab("Terminal").grid_rowconfigure(
     0, weight = 1)
 # configure grid of individual tabs
 editArea = Text(tabview.tab("Editor"), width = 700, height = 400,
-                font = ("Consolas", 13), bg = defbackground, fg = "white", insertbackground = "white", borderwidth = 0, padx = 15, pady = 10)
+                font = ("Consolas", 13), bg = Winbackground, fg = "white", insertbackground = "white", borderwidth = 0, padx = 15, pady = 10)
 editArea.grid(row = 0, column = 0, padx = (10, 10), pady = (
     10, 20), sticky = "nsew")
 
@@ -448,7 +449,7 @@ cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" +
 cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 
 
-cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#333333"}
+cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": SyntaxBg}
 
 # These five lines are optional. If omitted, default colours are used.
 cdg.tagdefs["COMMENT"] = {"foreground": "#268535", "background": SyntaxBg}
