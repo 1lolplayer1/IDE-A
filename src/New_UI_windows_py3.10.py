@@ -17,8 +17,6 @@ from tkinter import messagebox
 from watchdog import *
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from pathlib import Path
-import stat
 
 # Global start messages
 print("This is a beta version")
@@ -82,22 +80,7 @@ def change_scaling_event(new_scaling: str):
 
 
 file_path = ""
-
-dir_path = os.path.join(os.environ['USERPROFILE'], "Desktop")
-directory_name = "IDE-APROJECT"
-
-# Create the directory
-directory_path = os.path.join(dir_path, directory_name)
-
-if not os.path.exists(directory_path):
-    try:
-        os.makedirs(directory_path)
-        print(f"Directory '{directory_name}' created successfully!")
-    except OSError as error:
-        print(f"Failed to create directory: {error}")
-else:
-    print(f"Directory '{directory_name}' already exists. Skipping creation.")
-path = directory_path
+path = "."
 
 
 def set_file_path(f_path):
@@ -218,13 +201,17 @@ file_tree = Frame(sidebar_frame, width=400)
 file_tree.grid(row=0, column=0, sticky="wnse")
 
 
+abspath = "."
+
+
 def open_dir():
     global abspath
-    for i in tree.get_children():  # type: ignore
-        tree.delete(i)  # type: ignore
+    for i in tree.get_children():
+        tree.delete(i)
     path = askdirectory()
     abspath = os.path.abspath(path)
-    root_node = tree.insert("", "end", text=abspath, open=True)  # type: ignore
+    print("open_dir:", abspath)
+    root_node = tree.insert("", "end", text=abspath, open=True)
     process_directory(root_node, abspath)
 
 
@@ -235,8 +222,8 @@ def process_directory(parent, path):
     for p in os.listdir(path):
         abspath = os.path.join(path, p)
         isdir = os.path.isdir(abspath)
-        oid = tree.insert(parent, "end", text=p, open=False)  # type: ignore
-        filepaths[oid] = abspath  # save the full pathname
+        oid = tree.insert(parent, "end", text=p, open=False)
+        filepaths[oid] = abspath
         if isdir:
             process_directory(oid, abspath)
 
@@ -256,8 +243,6 @@ def Open_file_from_list_box(value):
 
 
 def newfile():
-    new_file_path = abspath
-    os.chmod(new_file_path, 0o700)
     base_filename = 'new.py'
     file_exists = os.path.exists(base_filename)
 
@@ -268,10 +253,13 @@ def newfile():
             new_filename = f"{base_filename[:-3]}_{count}.py"
             count += 1
             file_exists = os.path.exists(new_filename)
+            file_path = abspath
     else:
         new_filename = base_filename
+        file_path = abspath
 
-    fp = open(new_file_path, 'x')
+    fp = open(file_path, 'x')
+    editArea.insert(1.0, 'print("Welcome To The IDE-A")')
     fp.close()
 
 
@@ -302,11 +290,12 @@ def refresh_treeview():
     global tree, filepaths
     tree.delete(*tree.get_children())
     # Get the selected directory path
-    abspath = tree.item(tree.focus())['text']
-    if not abspath:  # If no directory is selected, default to current working directory
-        abspath = os.getcwd()
-    root_node = tree.insert("", "end", text=abspath, open=True)
-    process_directory(root_node, abspath)
+    path = abspath
+    print("refresh abspath: " + path)
+    if not path:  # If no directory is selected, default to current working directory
+        path = os.getcwd()
+    root_node = tree.insert("", "end", text=path, open=True)
+    process_directory(root_node, path)
 
 
 open_dir_bttn = customtkinter.CTkButton(
@@ -328,14 +317,11 @@ style.map("Treeview", background=[("selected", "grey")])
 tree = ttk.Treeview(file_tree, height=20)
 tree.grid(row=1, sticky="nsw")
 
-
-path = directory_path
-
-
 tree.heading("#0", text="File Explorer", anchor=CENTER)
 tree.column("#0", width=255, minwidth=25, stretch="YES")  # type: ignore
 # tree.heading("#1", text="v0", anchor=CENTER)
-abspath = os.path.abspath(path)
+path = abspath
+print(path)
 root_node = tree.insert("", "end", text=abspath, open=True)
 process_directory(root_node, abspath)
 
@@ -377,11 +363,13 @@ tabview.add("Terminal").grid_columnconfigure(0, weight=1)
 tabview.tab("Terminal").grid_columnconfigure(0, weight=1)
 tabview.tab("Terminal").grid_rowconfigure(
     0, weight=1)
+
 # configure grid of individual tabs
 editArea = Text(tabview.tab("Editor"), width=700, height=400,
                 font=("Consolas", 13), bg=background, fg="white", insertbackground="white", borderwidth=0, padx=15, pady=10)
 editArea.grid(row=0, column=0, padx=(10, 10), pady=(
     10, 20), sticky="nsew")
+
 
 editareaScrollbar = customtkinter.CTkScrollbar(
     tabview.tab("Editor"), command=editArea.yview)
@@ -442,7 +430,7 @@ SyntaxBg = ""
 
 cdg = ic.ColorDelegator()
 cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" +
-                      ic.make_pat().pattern, re.S)
+                      ic.make_pat(), re.S)
 cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 
 cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#282923"}
@@ -487,26 +475,56 @@ class Terminal:
         # get user input from entry widget
         command = self.entry.get()
         self.entry.delete(0, tk.END)
+        if command == "clr":
+            self.output.configure(state="normal")
+            self.output.delete(1.0, tk.END)
+            self.output.insert(tk.END, "$ ")
+            self.output.configure(state="disabled")
 
-        # print user input to terminal output
-        self.output.insert(tk.END, f"{command}\n")
+        elif command == "--help":
+            self.output.configure(state="normal")
+            self.output.insert(
+                tk.END, "Current Terminal Commands: \nclr - clears the terminal output \npwd - prints current working dir \nexit, quit - closes the ide")
+            self.output.configure(state="disabled")
 
-        # execute command and print output to terminal output
-        self.output.configure(state="normal")
+        elif command == "pwd":
+            self.output.configure(state="normal")
+            self.output.insert(tk.END, f"Current path: {abspath}")
+            self.output.configure(state="disabled")
+
+        elif command == "exit" or command == "quit":
+            app.destroy()
+        else:
+            # print user input to terminal output
+            self.update_output(f"{command}\n")
+            # execute command in a separate thread and print output to terminal output
+            threading.Thread(target=self.run_command, args=(command,)).start()
+
+    def run_command(self, command):
         try:
             output = subprocess.check_output(
                 command, shell=True, stderr=subprocess.STDOUT)
-            self.output.insert(tk.END, output.decode())
+            self.update_output(output.decode())
+
         except subprocess.CalledProcessError as e:
-            self.output.insert(tk.END, f"Error: {e}\n")
+            self.update_output(f"Error: {e}\n")
 
         # set command prompt to current working directory
         cwd = subprocess.check_output("cd", shell=True)
-        self.output.insert(tk.END, f"{cwd.decode().strip()}\\>")
-        self.output.configure(state="disabled")
+        self.update_output(f"{cwd.decode().strip()}\\>")
 
-        th = threading.Thread(target=run)
-        th.start(1)  # type: ignore
+    def custom_cmds(self, text):
+        clr = self.entry.get()
+        if clr == "clr":
+            self.output.delete()
+        else:
+            pass
+
+    def update_output(self, text):
+        self.output.configure(state="normal")
+        self.output.insert(tk.END, text)
+        self.output.configure(state="disabled")
+        self.output.see(tk.END)  # Scroll to the bottom of the output
 
 
 terminal = Terminal(tabview.tab("Terminal"))
