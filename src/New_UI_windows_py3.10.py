@@ -430,7 +430,7 @@ SyntaxBg = ""
 
 cdg = ic.ColorDelegator()
 cdg.prog = re.compile(r"\b(?P<MYGROUP>tkinter)\b|" +
-                      ic.make_pat(), re.S)
+                      ic.make_pat().pattern, re.S)
 cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 
 cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#282923"}
