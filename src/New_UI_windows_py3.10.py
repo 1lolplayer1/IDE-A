@@ -14,7 +14,7 @@ from tkinter.filedialog import asksaveasfilename, askopenfilename, askdirectory
 import jedi
 import tkinter.font as tkfont
 from tkinter import messagebox
-from watchdog import *
+from watchdog import * # type: ignore
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -162,8 +162,8 @@ normal = rgb((234, 234, 234))
 keywords = rgb((234, 95, 95))
 comments = rgb((95, 234, 165))
 string = rgb((234, 162, 95))
-function = rgb((95, 211, 234))
-background = rgb((40, 41, 35))
+function = rgb((39, 121, 221))
+background = rgb((51, 51, 51))
 defTree = rgb((42, 42, 48))
 variables = rgb((148, 215, 71))
 defFont = "Consolas 10"
@@ -258,7 +258,7 @@ def newfile():
         new_filename = base_filename
         file_path = abspath
 
-    fp = open(file_path, 'x')
+    fp = open(file_path, 'x') # type: ignore
     editArea.insert(1.0, 'print("Welcome To The IDE-A")')
     fp.close()
 
@@ -394,7 +394,7 @@ contextMenu.add_separator()
 contextMenu.add_command(label="Run Code", command=run)
 
 treeMenu = Menu(tree, tearoff=False,
-                background=background, foreground="white", borderwidth=None)
+                background=background, foreground="white", borderwidth=None) # type: ignore
 treeMenu.add_command(label="New File", command=newfile)
 treeMenu.add_command(label="Remove", command=remove_component_from_tree)
 treeMenu.add_command(label="Refresh", command=refresh_treeview)
@@ -436,11 +436,12 @@ cdg.idprog = r"(?<!class)\s+(\w+)"  # type: ignore
 cdg.tagdefs["MYGROUP"] = {"foreground": "#7F7F7F", "background": "#282923"}
 
 # These five lines are optional. If omitted, default colours are used.
-cdg.tagdefs["COMMENT"] = {"foreground": "#007F00 ", "background": SyntaxBg}
-cdg.tagdefs["KEYWORD"] = {"foreground": "#27b1dd", "background": SyntaxBg}
-cdg.tagdefs["BUILTIN"] = {"foreground": "#dddd22", "background": SyntaxBg}
-cdg.tagdefs["STRING"] = {"foreground": "#8b9b40", "background": SyntaxBg}
-cdg.tagdefs["DEFINITION"] = {"foreground": "#27b9b9", "background": SyntaxBg}
+cdg.tagdefs['COMMENT'] = {'foreground': '#268535', 'background': SyntaxBg}
+cdg.tagdefs['KEYWORD'] = {'foreground': '#bd45de', 'background': SyntaxBg}
+cdg.tagdefs['BUILTIN'] = {'foreground': '#ead75f', 'background': SyntaxBg}
+cdg.tagdefs['STRING'] = {'foreground': '#eaa25f', 'background': SyntaxBg}
+cdg.tagdefs['DEFINITION'] = {'foreground': '#ead75f', 'background': SyntaxBg}
+cdg.tagdefs['INSTANCE'] = {'foreground': '#27b9b9', 'background': SyntaxBg}
 
 
 ip.Percolator(editArea).insertfilter(cdg)
@@ -516,7 +517,7 @@ class Terminal:
     def custom_cmds(self, text):
         clr = self.entry.get()
         if clr == "clr":
-            self.output.delete()
+            self.output.delete() # type: ignore
         else:
             pass
 
